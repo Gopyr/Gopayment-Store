@@ -1,0 +1,211 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Gpayment Store</title>
+<style>
+  :root{--bg:#07111f;--card:#15243a;--card2:#1b2f4c;--line:#3c5573;--txt:#f5f7fb;--mut:#9db1c7;--acc:#4f8cff;--green:#55e6a5;--red:#ff6b6b;--gold:#ffd166;}
+  *{box-sizing:border-box;margin:0;padding:0}
+  body{background:var(--bg);color:var(--txt);font-family:system-ui,-apple-system,Segoe UI,Roboto,sans-serif;min-height:100vh}
+  header{display:flex;align-items:center;justify-content:space-between;padding:16px 22px;border-bottom:1px solid var(--line);background:rgba(7,17,31,.9);position:sticky;top:0;z-index:10}
+  header .logo{display:flex;align-items:center;gap:10px;cursor:pointer;font-weight:700;font-size:18px}
+  header .logo img{height:30px;width:30px;border-radius:8px}
+  header nav a{color:var(--mut);text-decoration:none;margin-left:16px;font-size:14px}
+  header nav a:hover{color:var(--txt)}
+  main{max-width:1100px;margin:0 auto;padding:28px 20px 80px}
+  h1{font-size:26px;margin-bottom:6px}
+  .sub{color:var(--mut);margin-bottom:24px}
+  .grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(250px,1fr));gap:18px}
+  .card{background:var(--card);border:1px solid var(--line);border-radius:16px;overflow:hidden;transition:transform .15s,box-shadow .15s}
+  .card:hover{transform:translateY(-3px);box-shadow:0 8px 24px rgba(0,0,0,.35)}
+  .thumb{height:140px;background:var(--card2);display:flex;align-items:center;justify-content:center;font-size:44px}
+  .thumb img{width:100%;height:100%;object-fit:cover}
+  .card-body{padding:16px}
+  .tag{display:inline-block;font-size:11px;text-transform:uppercase;letter-spacing:.5px;padding:3px 8px;border-radius:6px;margin-bottom:8px;font-weight:600}
+  .tag.akun{background:rgba(255,209,102,.15);color:var(--gold)}
+  .tag.link{background:rgba(79,140,255,.15);color:var(--acc)}
+  .tag.file{background:rgba(85,230,165,.15);color:var(--green)}
+  .card h3{font-size:16px;margin-bottom:6px}
+  .card p{color:var(--mut);font-size:13px;line-height:1.4;min-height:36px}
+  .price{font-size:18px;font-weight:700;margin:10px 0;color:var(--green)}
+  .stock{font-size:12px;color:var(--mut)}
+  .stock.zero{color:var(--red);font-weight:600}
+  .btn{display:inline-block;background:var(--acc);color:#fff;border:none;border-radius:10px;padding:11px 18px;font-size:14px;font-weight:600;cursor:pointer;text-decoration:none;text-align:center}
+  .btn:hover{filter:brightness(1.1)}
+  .btn:disabled{background:#3a4a63;cursor:not-allowed}
+  .btn.green{background:var(--green);color:#062}
+  .btn.ghost{background:transparent;border:1px solid var(--line);color:var(--txt)}
+  .btn.full{width:100%;margin-top:14px}
+  .detail{display:flex;gap:28px;flex-wrap:wrap}
+  .detail .hero{flex:1 1 360px}
+  .detail .panel{flex:1 1 320px;background:var(--card);border:1px solid var(--line);border-radius:16px;padding:22px}
+  .detail .bigthumb{height:240px;background:var(--card2);border-radius:16px;display:flex;align-items:center;justify-content:center;font-size:80px;margin-bottom:18px}
+  .detail .bigthumb img{width:100%;height:100%;object-fit:cover;border-radius:16px}
+  input[type=text],input[type=email]{width:100%;background:var(--card2);border:1px solid var(--line);border-radius:10px;padding:12px;color:var(--txt);font-size:14px;margin:8px 0 14px}
+  label{font-size:12px;color:var(--mut);display:block}
+  .row{display:flex;gap:12px}
+  .row>*{flex:1}
+  .hidden{display:none!important}
+  .order-box{background:var(--card);border:1px solid var(--line);border-radius:16px;padding:24px;text-align:center;max-width:520px;margin:20px auto}
+  .order-box .ico{font-size:56px;margin-bottom:12px}
+  .order-box pre{background:#0a1424;border:1px solid var(--line);border-radius:10px;padding:16px;text-align:left;overflow-x:auto;font-size:13px;white-space:pre-wrap;word-break:break-all;margin-top:14px}
+  .order-box .acclink{display:block;margin-top:16px;background:var(--card2);border:1px solid var(--acc);border-radius:10px;padding:14px;color:var(--acc);text-decoration:none;word-break:break-all}
+  .spinner{width:36px;height:36px;border:3px solid var(--line);border-top-color:var(--acc);border-radius:50%;animation:spin 1s linear infinite;margin:20px auto}
+  @keyframes spin{to{transform:rotate(360deg)}}
+  .err{background:rgba(255,107,107,.12);border:1px solid var(--red);color:var(--red);padding:12px 16px;border-radius:10px;margin:14px 0}
+  .ok{background:rgba(85,230,165,.12);border:1px solid var(--green);color:var(--green);padding:12px 16px;border-radius:10px;margin:14px 0}
+  .muted{color:var(--mut);font-size:13px}
+  footer{text-align:center;color:var(--mut);padding:20px;font-size:12px;border-top:1px solid var(--line)}
+</style>
+</head>
+<body>
+<header>
+  <div class="logo" onclick="route('')"><span>🛍️</span> Gpayment Store</div>
+  <nav><a href="#" onclick="route('')">Katalog</a></nav>
+</header>
+<main id="app"><div class="spinner"></div></main>
+<footer>Gpayment Store &middot; Pembayaran QRIS aman &middot; Akun dialokasikan otomatis &amp; acak</footer>
+
+<script>
+const fmt = n => 'Rp ' + Number(n||0).toLocaleString('id-ID');
+const TYPE = {akun:['akun','Account Unik'],link:['link','Download Link'],file:['file','File']};
+
+async function api(url, opts){
+  const r = await fetch(url, opts);
+  const j = await r.json().catch(()=>({}));
+  if(!r.ok) throw new Error(j.error || 'Gagal memuat data');
+  return j;
+}
+
+async function loadCatalog(){
+  document.getElementById('app').innerHTML = '<div class="spinner"></div>';
+  try{
+    const {products} = await api('/api/catalog');
+    const t = TYPE;
+    document.getElementById('app').innerHTML = `
+      <h1>Semua Produk</h1>
+      <p class="sub">Pilih item, bayar via QRIS, dan terima akun/link/file otomatis.</p>
+      <div class="grid">${
+        products.length===0 ? '<p class="muted">Belum ada produk.</p>' :
+        products.map(p=>{
+          const [cls,label] = t[p.type]||['','Item'];
+          const zero = p.type==='akun' && p.stock<=0;
+          return `<div class="card">
+            <div class="thumb">${p.image?`<img src="${p.image}" alt="">`:'🎁'}</div>
+            <div class="card-body">
+              <span class="tag ${cls}">${label}</span>
+              <h3>${p.name}</h3>
+              <p>${p.description||''}</p>
+              <div class="price">${fmt(p.price)}</div>
+              <div class="stock ${zero?'zero':''}">${p.type==='akun' ? (zero?'Stok Habis':'Stok '+p.stock)+' &middot; dapat akun acak' : 'Akses langsung'}</div>
+              <button class="btn full" ${zero?'disabled':''} onclick="route('item/'+encodeURIComponent(p.id))">${zero?'Sold Out':'Beli Sekarang'}</button>
+            </div>
+          </div>`;
+        }).join('')
+      }</div>`;
+  }catch(e){ document.getElementById('app').innerHTML = `<div class="err">${e.message}</div>`; }
+}
+
+async function loadItem(id){
+  try{
+    const {product:p} = await api('/api/catalog?id='+encodeURIComponent(id));
+    const [cls,label] = TYPE[p.type]||['','Item'];
+    const zero = p.type==='akun' && p.stock<=0;
+    document.getElementById('app').innerHTML = `
+      <div class="detail">
+        <div class="hero">
+          <h1>${p.name}</h1>
+          <div style="margin:8px 0"><span class="tag ${cls}">${label}</span></div>
+          <p class="sub">${p.description||''}</p>
+          <div class="bigthumb">${p.image?`<img src="${p.image}" alt="">`:'🎁'}</div>
+          <p class="muted">${p.type==='akun' ? 'Setelah bayar, kamu otomatis dapat 1 akun yang dipilih secara acak dari stok tersedia. Akun yang sudah terjual tidak akan dijual lagi.' : 'Setelah bayar, akses link/file langsung diberikan.'}</p>
+        </div>
+        <div class="panel">
+          <h3>Checkout</h3>
+          <div class="price" style="font-size:24px">${fmt(p.price)}</div>
+          <div class="stock ${zero?'zero':''}">${p.type==='akun' ? (zero?'Stok Habis':'Stok tersedia: '+p.stock) : ''}</div>
+          <label>Nama Pembeli</label><input type="text" id="buyerName" placeholder="Nama kamu">
+          <label>Email (opsional)</label><input type="email" id="buyerEmail" placeholder="email@example.com">
+          <button class="btn green full" id="payBtn" ${zero?'disabled':''} onclick="startOrder()">${zero?'Stok Habis':'Bayar QRIS'}</button>
+          <div id="payBox"></div>
+        </div>
+      </div>`;
+  }catch(e){ document.getElementById('app').innerHTML = `<div class="err">${e.message}</div>`; }
+}
+
+async function startOrder(){
+  const id = currentItem();
+  const name = document.getElementById('buyerName').value;
+  const email = document.getElementById('buyerEmail').value;
+  const btn = document.getElementById('payBtn');
+  btn.disabled = true; btn.textContent = 'Membuat pembayaran...';
+  document.getElementById('payBox').innerHTML = '';
+  try{
+    const r = await api('/api/order?action=create',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({productId:id,buyerName:name,buyerEmail:email})});
+    // go to the order tracking page; it will surface the QRIS link to pay
+    location.hash = '#/order/' + r.orderId;
+    loadOrder(r.orderId, r.paymentUrl);
+  }catch(e){
+    btn.disabled=false; btn.textContent='Bayar QRIS';
+    document.getElementById('payBox').innerHTML = `<div class="err">${e.message}</div>`;
+  }
+}
+
+async function loadOrder(orderId, payUrl){
+  document.getElementById('app').innerHTML = `
+    <div class="order-box"><div class="ico">⏳</div><h2>Menunggu Pembayaran</h2>
+    <p class="muted" id="ordMsg">Pembayaran sedang diverifikasi...</p>
+    ${payUrl?`<a class="btn green" href="${payUrl}" target="_blank" rel="noopener" style="margin-top:16px">📱 Scan QRIS untuk bayar</a>`:''}
+    <div class="spinner"></div></div>`;
+  const poll = setInterval(async ()=>{
+    try{
+      const {order} = await api('/api/order?action=status&orderId='+encodeURIComponent(orderId));
+      if(order.status==='success'){
+        clearInterval(poll);
+        renderSuccess(order);
+      } else if(order.status==='failed' || order.status==='timeout'){
+        clearInterval(poll);
+        document.getElementById('app').innerHTML = `<div class="order-box"><div class="ico">⚠️</div><h2>${order.status==='timeout'?'Sesi Kedaluwarsa':'Gagal'}</h2><p class="muted">${order.error||'Pembayaran tidak terkonfirmasi.'}</p><a class="btn" href="#" onclick="route('')">Kembali ke Katalog</a></div>`;
+      } else if(order.paymentUrl && !document.querySelector('.order-box .btn.green')){
+        // surface the QRIS button on first response if it wasn't passed inline
+        const wrap=document.querySelector('.order-box');
+        if(wrap){ const b=document.createElement('a'); b.className='btn green'; b.href=order.paymentUrl; b.target='_blank'; b.rel='noopener'; b.style.cssText='margin-top:16px'; b.textContent='📱 Scan QRIS untuk bayar'; wrap.insertBefore(b, wrap.querySelector('.spinner')); }
+      }
+    }catch(e){}
+  }, 5000);
+}
+
+function renderSuccess(order){
+  let body = '';
+  if(order.type==='akun'){
+    body = `<div class="ico">✅</div><h2>Pembayaran Berhasil!</h2>
+      <p class="muted">Akun kamu (dipilih acak):</p>
+      <pre>${order.account||'—'}</pre>
+      <p class="muted" style="margin-top:8px">Simpan baik-baik. Akun ini sudah tidak tersedia untuk pembeli lain.</p>`;
+  } else if(order.type==='link'){
+    body = `<div class="ico">✅</div><h2>Pembayaran Berhasil!</h2>
+      <p class="muted">Link download kamu:</p>
+      <a class="acclink" href="${order.link}" target="_blank" rel="noopener">${order.link}</a>`;
+  } else if(order.type==='file'){
+    body = `<div class="ico">✅</div><h2>Pembayaran Berhasil!</h2>
+      <p class="muted">File kamu:</p>
+      <a class="acclink" href="${order.fileUrl}" target="_blank" rel="noopener">⬇️ ${order.fileName||'Download'}</a>`;
+  }
+  document.getElementById('app').innerHTML = `<div class="order-box">${body}${order.txId?`<p class="muted">ID Transaksi: ${order.txId}</p>`:''}<a class="btn ghost" href="#" onclick="route('')" style="margin-top:18px">Kembali ke Katalog</a></div>`;
+}
+
+let _item = null;
+function currentItem(){ return _item; }
+function route(h){
+  h = h.replace(/^#\/?/,'');
+  const p = h.split('/');
+  if(p[0]==='item'){ _item = decodeURIComponent(p[1]||''); loadItem(_item); }
+  else if(p[0]==='order'){ loadOrder(decodeURIComponent(p[1]||'')); }
+  else loadCatalog();
+}
+window.addEventListener('hashchange', ()=>{ route(location.hash.slice(1)); });
+route(location.hash.slice(1));
+</script>
+</body>
+</html>

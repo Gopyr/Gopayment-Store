@@ -1,0 +1,33 @@
+{
+  "version": 2,
+  "functions": {
+    "api/**/*.js": { "maxDuration": 30 }
+  },
+  "headers": [
+    {
+      "source": "/(.*)",
+      "headers": [
+        { "key": "X-Content-Type-Options",            "value": "nosniff" },
+        { "key": "X-Frame-Options",                   "value": "DENY" },
+        { "key": "X-XSS-Protection",                  "value": "1; mode=block" },
+        { "key": "Referrer-Policy",                   "value": "strict-origin-when-cross-origin" },
+        { "key": "Permissions-Policy",                "value": "camera=(), microphone=(), geolocation=()" },
+        { "key": "Strict-Transport-Security",         "value": "max-age=63072000; includeSubDomains; preload" },
+        { "key": "Content-Security-Policy",           "value": "default-src 'self'; script-src 'self' 'unsafe-inline'; style-src 'self' 'unsafe-inline' https://fonts.googleapis.com; font-src https://fonts.gstatic.com; img-src 'self' data:; connect-src 'self'" }
+      ]
+    }
+  ],
+  "rewrites": [
+    { "source": "/",                       "destination": "/public/store.html" },
+    { "source": "/store",                  "destination": "/public/store.html" },
+    { "source": "/store/",                 "destination": "/public/store.html" },
+    { "source": "/admin-products",         "destination": "/public/admin-products.html" },
+    { "source": "/admin-products/",        "destination": "/public/admin-products.html" },
+    { "source": "/api/catalog",            "destination": "/api/catalog" },
+    { "source": "/api/order",              "destination": "/api/order" },
+    { "source": "/api/admin",              "destination": "/api/admin" },
+    { "source": "/api/admin-products",     "destination": "/api/admin-products" },
+    { "source": "/api/admin-products/:rest", "destination": "/api/admin-products" }
+  ],
+  "cleanUrls": true
+}
