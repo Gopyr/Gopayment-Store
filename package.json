@@ -1,0 +1,14 @@
+{
+  "name": "gopayment-store",
+  "version": "1.0.0",
+  "type": "module",
+  "description": "Storefront jual item digital (akun random / link / file) + payment gateway QRIS mandiri, self-hosted, SQLite (node:sqlite)",
+  "main": "server.js",
+  "scripts": {
+    "start": "node server.js",
+    "test": "node test/flow.test.mjs"
+  },
+  "dependencies": {
+    "qrcode": "^1.5.4"
+  }
+}
