@@ -1,6 +1,6 @@
 # Gopayment Storefront
 
-Web transaksi untuk menjual **item digital** — **akun (alokasi acak)**, **link**, dan **file** — dengan pembayaran **QRIS** melalui gateway [Gopayment](https://github.com/Gopyr/Gopayment) (repo private). Deploy gratis di **Vercel**.
+Web transaksi untuk menjual **item digital** (**akun alokasi acak**, **link**, dan **file**) dengan pembayaran **QRIS** melalui gateway [Gopayment](https://github.com/Gopyr/Gopayment) (repo private). Deploy gratis di **Vercel**.
 
 > Repo ini adalah **lapisan toko (frontend + backend store) terpisah** dari gateway pembayaran.
 > Pembayaran QRIS **diserahkan ke repo Gopayment** (private), storefront memanggilnya lewat API gateway.
@@ -54,9 +54,9 @@ Pastikan repo private **Gopayment** sudah ter-deploy di Vercel dan env `QRIS_STR
 
 ## Verifikasi
 Ada 3 suite test (ESM) di `test/` yang dijalankan dengan `node`:
-- `store.test.mjs` — logika store + alokasi acak + stok
-- `http.test.mjs` — alur endpoint (catalog → order → fulfill)
-- `admin.test.mjs` — CRUD admin + auth
+- `store.test.mjs`: logika store + alokasi acak + stok
+- `http.test.mjs`: alur endpoint (catalog → order → fulfill)
+- `admin.test.mjs`: CRUD admin + auth
 
 ```bash
 npm install && node test/store.test.mjs && node test/http.test.mjs && node test/admin.test.mjs
