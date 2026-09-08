@@ -1,6 +1,11 @@
 {
-  "name": "gopayment-store",
+  "name": "gopayment-store-frontend",
   "version": "1.0.0",
+  "private": true,
   "type": "module",
+  "scripts": {
+    "build": "echo \"No build step needed for static files and serverless functions\"",
+    "start": "echo \"Vercel handles routing, no local start script\""
+  },
   "dependencies": {}
 }
