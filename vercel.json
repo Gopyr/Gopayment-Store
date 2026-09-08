@@ -29,5 +29,6 @@
     { "source": "/api/admin-products",     "destination": "/api/admin-products" },
     { "source": "/api/admin-products/:rest", "destination": "/api/admin-products" }
   ],
+  "outputDirectory": "public",
   "cleanUrls": true
 }
