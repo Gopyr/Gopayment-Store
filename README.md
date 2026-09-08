@@ -1,63 +1,195 @@
-# Gopayment Storefront
+# Gopayment Store
 
-Web transaksi untuk menjual **item digital** (**akun alokasi acak**, **link**, dan **file**) dengan pembayaran **QRIS** melalui gateway [Gopayment](https://github.com/Gopyr/Gopayment) (repo private). Deploy gratis di **Vercel**.
+Web store untuk menjual produk digital dengan pembayaran GoPay QRIS. Store ini memakai source dan API payment gateway dari repository private [Gopayment](https://github.com/Gopyr/Gopayment).
 
-> Repo ini adalah **lapisan toko (frontend + backend store) terpisah** dari gateway pembayaran.
-> Pembayaran QRIS **diserahkan ke repo Gopayment** (private), storefront memanggilnya lewat API gateway.
+Store mengurus katalog, produk, stok akun, order, dan pengiriman barang digital. Gopayment mengurus pembuatan QRIS, login GoPay Merchant, pengecekan pembayaran, dan callback transaksi.
 
-## ⚠️ Logika backend item: hanya tipe `akun`
-- **`akun`** (contoh: akun Freefire): pembeli bayar → backend **memilih 1 akun secara acak** dari stok pool → akun di-mark `sold` dan **tidak bisa dijual lagi**. Stok berkurang.
-- **`link` / `file`**: pembeli bayar → langsung dapat link / file. Stok **tidak** berkurang (unlimited).
-- Logika alokasi acak & stok **hanya berlaku untuk tipe `akun`**, tidak untuk tipe lain.
+## Alur aplikasi
 
-## Deploy (2 langkah)
+1. Pembeli membuka `/store` dan memilih produk.
+2. Store membuat order melalui `POST /api/order?action=create`.
+3. Store memanggil Gopayment melalui `POST /api/gateway/create`.
+4. Gopayment membuat QRIS dinamis dari `QRIS_STRING` merchant dan mengembalikan `paymentUrl`.
+5. Pembeli membayar melalui halaman QRIS Gopayment.
+6. Gopayment mengecek transaksi melalui akun GoPay Merchant.
+7. Setelah pembayaran berhasil, Gopayment mengirim callback ke store.
+8. Store menyelesaikan order dan mengirim produk kepada pembeli.
 
-### 1. Deploy gateway dulu (repo Gopayment yang sudah ada)
-Pastikan repo private **Gopayment** sudah ter-deploy di Vercel dan env `QRIS_STRING`, `GOPAY_EMAIL`, `GOPAY_PASSWORD`, `UPSTASH_REDIS_*`, `ADMIN_PASSWORD`, `GATEWAY_API_KEY` sudah terisi.
+Untuk produk `akun`, satu akun yang belum terjual dipilih secara acak dan ditandai `sold`. Produk `link` dan `file` dikirim dari data produk setelah pembayaran berhasil.
 
-### 2. Deploy repo ini (storefront)
-1. Import repo ini di Vercel → **Deploy**.
-2. Tambahkan env vars (lihat `.env.example`):
-   - `GOPAYMENT_APP_URL` = domain Gopayment (contoh: `https://gopayment.vercel.app`)
-   - `GATEWAY_API_KEY` = API key yang **sama** dengan yang di-set di Gopayment
-   - `UPSTASH_REDIS_REST_URL`, `UPSTASH_REDIS_REST_TOKEN` (bisa shared dengan Gopayment)
-   - `ADMIN_PASSWORD`
-3. **Redeploy** agar env aktif.
+## Struktur project
+
+```text
+.
+├── api/
+│   ├── _admin_auth.js
+│   ├── _orders.js
+│   ├── _products.js
+│   ├── _store.js
+│   ├── admin.js
+│   ├── admin-products.js
+│   ├── catalog.js
+│   └── order.js
+├── public/
+│   ├── admin-products.html
+│   └── store.html
+├── test/
+│   ├── admin.test.mjs
+│   ├── order.test.mjs
+│   └── store.test.mjs
+├── .env.example
+├── package.json
+└── vercel.json
+```
+
+## Database
+
+Data store disimpan di Upstash Redis melalui REST API. `api/_store.js` menyimpan produk, order, mapping sesi pembayaran, session admin, dan rate limit sebagai JSON.
+
+Database yang digunakan project ini saat ini adalah **Upstash Redis**, bukan SQLite. Repository Gopayment menggunakan storage Upstash yang sama untuk data payment gateway.
+
+## Deployment
+
+Deploy kedua project secara terpisah di Vercel.
+
+### 1. Deploy Gopayment
+
+Deploy repository private `Gopyr/Gopayment` terlebih dahulu. Isi environment variable berikut di project Gopayment:
+
+| Variable | Value |
+|---|---|
+| `GOPAY_EMAIL` | `raepits@gmail.com` |
+| `GOPAY_PASSWORD` | Password akun GoPay Merchant |
+| `QRIS_STRING` | String QRIS statis milik merchant |
+| `UPSTASH_REDIS_REST_URL` | URL REST database Upstash Redis |
+| `UPSTASH_REDIS_REST_TOKEN` | Token REST database Upstash Redis |
+| `ADMIN_PASSWORD` | Password dashboard admin Gopayment |
+| `GATEWAY_API_KEY` | API key yang dipakai store saat memanggil gateway |
+| `APP_URL` | URL deployment Gopayment |
+
+`QRIS_STRING` adalah isi mentah QRIS merchant yang biasanya dimulai dengan `000201`. QRIS tersebut menjadi dasar pembuatan QRIS dinamis sesuai nominal order.
+
+### 2. Deploy Gopayment Store
+
+Deploy repository ini setelah URL gateway tersedia. Isi environment variable berikut di project storefront:
+
+| Variable | Value |
+|---|---|
+| `GOPAYMENT_APP_URL` | URL deployment Gopayment, misalnya `https://gopayment.vercel.app` |
+| `GATEWAY_API_KEY` | Nilai yang sama dengan `GATEWAY_API_KEY` di Gopayment |
+| `UPSTASH_REDIS_REST_URL` | URL REST database Upstash Redis untuk store |
+| `UPSTASH_REDIS_REST_TOKEN` | Token REST database Upstash Redis untuk store |
+| `ADMIN_PASSWORD` | Password halaman `/admin-products` |
+
+Setelah variable disimpan, redeploy kedua project.
 
 ## Halaman
+
 | Halaman | URL |
 |---|---|
-| Toko (katalog) | `/` atau `/store` |
-| Hasil pembelian + QRIS | `/store#/order/:orderId` |
-| Admin kelola produk | `/admin-products` |
+| Store | `/` atau `/store` |
+| Detail order | `/store#/order/<orderId>` |
+| Admin produk | `/admin-products` |
+| Admin payment gateway | `/admin` pada project Gopayment |
+| Halaman QRIS | `/pay/<sessionId>` pada project Gopayment |
 
-## Endpoint
-| Route | Fungsi |
-|---|---|
-| `GET /api/catalog` | Daftar produk publik + stok |
-| `POST /api/order?action=create` | Buat order + sesi QRIS (via gateway) |
-| `GET /api/order?action=status&orderId=` | Poll status order / kirim akun |
-| `GET /api/order?action=resolve&sessionId=` | Cari orderId dari session pembayaran |
-| `POST /api/order?action=payhook` | Webhook dari gateway saat QRIS terkonfirmasi |
-| `GET/POST /api/admin?action=login/verify/logout` | Auth admin (cookie) |
-| `GET /api/admin-products?action=list/get` | Admin: lihat produk |
-| `POST /api/admin-products?action=create/update/delete` | Admin: CRUD produk |
-| `POST /api/admin-products?action=add-accounts` | Admin: tambah stok akun (bulk) |
-| `POST /api/admin-products?action=remove-account` | Admin: hapus 1 akun |
+## Endpoint store
 
-## Alur pembelian
-1. Pembeli buka `/store`, pilih produk tipe **akun** → **Beli**.
-2. Storefront panggil `POST /api/gateway/create` di Gopayment → dapat `paymentUrl` (halaman QRIS). **Stok belum berkurang.**
-3. Pembeli klik **Scan QRIS** → terbuka halaman QRIS Gopayment → scan & bayar.
-4. Saat QRIS terkonfirmasi di Gopayment, gateway kirim **callback** ke `/api/order?action=payhook` storefront → `orders.fulfill()` → **pilih 1 akun acak**, tandai `sold`, kirim ke pembeli.
-5. Halaman `/store#/order/:orderId` polling status → menampilkan akun/link/file saat sukses.
+| Method | Endpoint | Fungsi |
+|---|---|---|
+| `GET` | `/api/catalog` | Mengambil katalog publik dan stok. |
+| `POST` | `/api/order?action=create` | Membuat order dan sesi pembayaran di Gopayment. |
+| `GET` | `/api/order?action=status&orderId=...` | Mengambil status order dan barang yang sudah dibayar. |
+| `GET` | `/api/order?action=resolve&sessionId=...` | Mencari order lokal berdasarkan sesi pembayaran. |
+| `POST` | `/api/order?action=payhook` | Callback dari Gopayment setelah pembayaran berhasil. |
+| `POST` | `/api/admin?action=login` | Login admin store. |
+| `GET` | `/api/admin?action=verify` | Memeriksa session admin. |
+| `POST` | `/api/admin?action=logout` | Logout admin. |
+| `GET` | `/api/admin-products?action=list` | Mengambil semua produk. |
+| `POST` | `/api/admin-products?action=create` | Membuat produk. |
+| `POST` | `/api/admin-products?action=update` | Mengubah produk. |
+| `POST` | `/api/admin-products?action=delete` | Menghapus produk. |
+| `POST` | `/api/admin-products?action=add-accounts` | Menambah stok akun secara bulk. |
+| `POST` | `/api/admin-products?action=remove-account` | Menghapus satu akun dari stok. |
 
-## Verifikasi
-Ada 3 suite test (ESM) di `test/` yang dijalankan dengan `node`:
-- `store.test.mjs`: logika store + alokasi acak + stok
-- `http.test.mjs`: alur endpoint (catalog → order → fulfill)
-- `admin.test.mjs`: CRUD admin + auth
+## Integrasi ke Gopayment
+
+Store mengirim request berikut ke gateway:
+
+```js
+const response = await fetch(`${GOPAYMENT_APP_URL}/api/gateway/create`, {
+  method: 'POST',
+  headers: {
+    'Content-Type': 'application/json',
+    'x-api-key': GATEWAY_API_KEY,
+  },
+  body: JSON.stringify({
+    nama: product.name,
+    tentang: `${product.name} - Order`,
+    nominal: product.price,
+    callbackUrl: `${STORE_URL}/api/order?action=payhook`,
+  }),
+});
+```
+
+Gateway mengembalikan `sessionId` dan `paymentUrl`. Store menyimpan keduanya pada order dan menampilkan `paymentUrl` kepada pembeli.
+
+Status pembayaran dapat dibaca melalui:
+
+```text
+GET ${GOPAYMENT_APP_URL}/api/gateway/status?sessionId=<sessionId>
+```
+
+Request status juga memakai header `x-api-key`. Saat pembayaran berhasil, gateway mengembalikan status `success`, `confirmed`, `txId`, dan waktu pembayaran.
+
+Callback dari gateway dikirim ke:
+
+```text
+POST https://<domain-store>/api/order?action=payhook
+```
+
+Callback memakai header `x-gpayment-signature` yang dibuat dari `GATEWAY_API_KEY`. Payload callback membawa `sessionId`, `txId`, dan waktu pembayaran.
+
+## Produk
+
+### Akun
+
+Produk `akun` memiliki pool akun yang dikelola dari halaman admin. Satu baris berarti satu akun, misalnya:
+
+```text
+email1@example.com:password1
+email2@example.com:password2
+```
+
+Ketika order berhasil dibayar, store memilih satu akun dari pool dan menandainya sebagai `sold`.
+
+### Link
+
+Produk `link` mengirim URL yang disimpan pada field `link` produk. Produk ini dapat dibeli berulang kali.
+
+### File
+
+Produk `file` mengirim `fileUrl` dan `fileName` yang disimpan pada produk. Produk ini dapat dibeli berulang kali.
+
+## Menjalankan test
 
 ```bash
-npm install && node test/store.test.mjs && node test/http.test.mjs && node test/admin.test.mjs
+npm install
+node test/store.test.mjs
+node test/order.test.mjs
+node test/admin.test.mjs
 ```
+
+Test order menggunakan gateway mock, sehingga tidak membuat transaksi QRIS sungguhan.
+
+## Menambah produk
+
+1. Buka `/admin-products`.
+2. Login menggunakan `ADMIN_PASSWORD` store.
+3. Buat produk dengan tipe `akun`, `link`, atau `file`.
+4. Untuk produk `akun`, buka pengelolaan akun lalu masukkan satu akun per baris.
+5. Produk langsung muncul di katalog setelah disimpan.
+
+[1]: https://github.com/Gopyr/Gopayment "Gopayment payment gateway repository"
+[2]: https://vercel.com/docs/functions "Vercel Functions documentation"
+[3]: https://upstash.com/docs/redis/features/restapi "Upstash Redis REST API documentation"
