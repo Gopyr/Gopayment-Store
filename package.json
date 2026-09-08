@@ -3,9 +3,10 @@
   "version": "1.0.0",
   "private": true,
   "type": "module",
+  "main": "index.js",
   "scripts": {
-    "build": "echo \"No build step needed for static files and serverless functions\"",
-    "start": "echo \"Vercel handles routing, no local start script\""
+    "build": "echo \"No build step needed\"",
+    "start": "node index.js"
   },
   "dependencies": {}
 }
