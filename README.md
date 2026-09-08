@@ -58,7 +58,7 @@ Deploy repository private `Gopyr/Gopayment` terlebih dahulu. Isi environment var
 
 | Variable | Value |
 |---|---|
-| `GOPAY_EMAIL` | `raepits@gmail.com` |
+| `GOPAY_EMAIL` | `example@gmail.com` |
 | `GOPAY_PASSWORD` | Password akun GoPay Merchant |
 | `QRIS_STRING` | String QRIS statis milik merchant |
 | `UPSTASH_REDIS_REST_URL` | URL REST database Upstash Redis |
