@@ -1,6 +1,6 @@
 # Gopayment Store
 
-Web store untuk menjual produk digital dengan pembayaran GoPay QRIS. Store ini memakai source dan API payment gateway dari repository private [Gopayment](https://github.com/Gopyr/Gopayment).
+Toko web untuk menjual produk digital dengan pembayaran GoPay QRIS. Store ini memakai source dan API payment gateway dari repository private [Gopayment](https://github.com/Gopyr/Gopayment).
 
 Store mengurus katalog, produk, stok akun, order, dan pengiriman barang digital. Gopayment mengurus pembuatan QRIS, login GoPay Merchant, pengecekan pembayaran, dan callback transaksi.
 
@@ -190,6 +190,3 @@ Test order menggunakan gateway mock, sehingga tidak membuat transaksi QRIS sungg
 4. Untuk produk `akun`, buka pengelolaan akun lalu masukkan satu akun per baris.
 5. Produk langsung muncul di katalog setelah disimpan.
 
-[1]: https://github.com/Gopyr/Gopayment "Gopayment payment gateway repository"
-[2]: https://vercel.com/docs/functions "Vercel Functions documentation"
-[3]: https://upstash.com/docs/redis/features/restapi "Upstash Redis REST API documentation"
