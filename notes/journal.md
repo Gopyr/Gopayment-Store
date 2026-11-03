@@ -1,1 +1,2 @@
 - 2026-10-20 fix: type narrowing in handler
+- 2026-11-03 perf: avoid redundant re-render
