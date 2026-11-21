@@ -190,3 +190,4 @@ Test order menggunakan gateway mock, sehingga tidak membuat transaksi QRIS sungg
 4. Untuk produk `akun`, buka pengelolaan akun lalu masukkan satu akun per baris.
 5. Produk langsung muncul di katalog setelah disimpan.
 - 2026-11-10 chore: tidy eslint overrides
+- 2026-11-21 build: update toolchain config
